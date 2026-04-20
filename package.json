@@ -1,0 +1,17 @@
+{
+  "name": "telegram-companion",
+  "version": "1.0.0",
+  "description": "Adaptive Conversational Agent",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@google/genai": "latest",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "pg": "^8.11.5",
+    "telegraf": "^4.16.3"
+  }
+}
