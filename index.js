@@ -25,6 +25,7 @@ function getDateContext() {
     const holidays = {
         "01-01": "New Year's Day",
         "02-14": "Valentine's Day",
+        "10-31": "Halloween",
         "12-24": "Christmas Eve",
         "12-25": "Christmas",
         "12-31": "New Year's Eve"
@@ -106,14 +107,18 @@ User Query: ${userQuery}
 
 // App Bootstrap
 app.listen(port, async () => {
-    logger.log('INFO', 'Initializing Database...');
-    await initDB();
-    logger.log('INFO', `Express running on port ${port}`);
-    
-    bot.launch();
-    logger.log('INFO', 'Telegram Agent live and polling.');
+    try {
+        logger.log('INFO', 'Initializing Database...');
+        await initDB();
+        logger.log('INFO', `Express running on port ${port}`);
+        
+        bot.launch();
+        logger.log('INFO', 'Telegram Agent live and polling.');
+    } catch (error) {
+        logger.log('ERROR', `Fatal Startup Error: ${error.message}`);
+        console.error("Fatal Startup Error:", error);
+    }
 });
-
 // Graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
