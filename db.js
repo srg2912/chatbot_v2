@@ -9,20 +9,15 @@ export const initDB = async () => {
     // Enable Vector Extension
     await pool.query('CREATE EXTENSION IF NOT EXISTS vector;');
 
+    await pool.query('DROP TABLE IF EXISTS document_chunks;');
+
     // LTM Table
     await pool.query(`
         CREATE TABLE IF NOT EXISTS document_chunks (
             id SERIAL PRIMARY KEY,
             content TEXT NOT NULL,
-            embedding vector(768)
+            embedding vector(3072)
         );
-    `);
-
-    // IVFFlat Index for Vector Search
-    await pool.query(`
-        CREATE INDEX IF NOT EXISTS document_chunks_embedding_idx
-        ON document_chunks USING ivfflat (embedding vector_cosine_ops)
-        WITH (lists = 100);
     `);
 
     // STM & Logging Table
