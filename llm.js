@@ -4,7 +4,7 @@ dotenv.config();
 
 const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY });
 const modelName = process.env.LLM_MODEL || 'gemini-2.5-flash';
-const embedModel = 'text-embedding-004';
+const embedModel = process.env.EMBEDDING_MODEL || 'text-embedding-001';
 
 export const llm = {
     generateResponse: async (prompt) => {
