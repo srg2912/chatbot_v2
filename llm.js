@@ -19,7 +19,7 @@ const withRetry = async (apiCall, retries = 3) => {
                 throw error; // If out of retries, or if it's a permanent error (like bad API key), crash.
             }
             logger.log('WARN', `Google API Error (${error.message}). Retrying in 2 seconds... (Attempt ${i + 1} of ${retries})`);
-            await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+            await new Promise(resolve => setTimeout(resolve, (i + 1) * 3000));
         }
     }
 };
