@@ -100,9 +100,13 @@ User Query: ${userQuery}
         await memoryManager.saveMessage('bot', responseText);
         await memoryManager.incrementMessageCount(); // Global count increments by 1 interaction pair
 
-    } catch (error) {
-        logger.log('ERROR', `Pipeline failed: ${error.message}`);
-        ctx.reply("Sorry, I encountered an internal error. Checking my logs.");
+} catch (error) {
+        // Extract ALL properties from the error, including hidden API data and stack traces
+        const errorDetails = JSON.stringify(error, Object.getOwnPropertyNames(error));
+        
+        logger.log('ERROR', `Pipeline failed. Message: ${error.message} | Full Dump: ${errorDetails}`);
+        
+        ctx.reply("Sorry, my brain just glitched for a second. Could you repeat that?");
     }
 });
 
