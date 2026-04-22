@@ -32,7 +32,9 @@ export const llm = {
                 const response = await ai.models.generateContent({
                     model: modelName,
                     contents: messages,
-                    tools: tools // Give Gemini the tools
+                    config: {
+                        tools: tools // <--- Now it is correctly passed to Google!
+                    }
                 });
 
                 // Check if bot decided to use a terminal command
