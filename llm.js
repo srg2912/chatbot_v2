@@ -23,9 +23,11 @@ const withRetry = async (apiCall, retries = 3) => {
 };
 
 export const llm = {
-    generateResponse: async (prompt) => {
+generateResponse: async (promptData) => {
         return await withRetry(async () => {
-            let messages = [{ role: 'user', parts: [{ text: prompt }] }];
+            // If it's a simple string, wrap it. If it's already an array (text + image), use it directly.
+            const parts = Array.isArray(promptData) ? promptData : [{ text: promptData }];
+            let messages =[{ role: 'user', parts: parts }];
             
             // Loop up to 5 times allowing bot to chain commands (e.g. Write file -> Run file -> Fix error -> Run again)
             for (let turn = 0; turn < 5; turn++) {

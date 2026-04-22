@@ -39,18 +39,46 @@ function getDateContext() {
     return contextLines.length > 0 ? contextLines.join(' ') : null;
 }
 
-// Telegram Message Pipeline
-bot.on('text', async (ctx) => {
+// Listen to both text and photos
+bot.on(['text', 'photo'], async (ctx) => {
     if (ctx.from.id !== ALLOWED_USER_ID) {
         return ctx.reply("Unauthorized user.");
     }
 
-    const userQuery = ctx.message.text;
-
-    // Pipeline Step 1: Logging Hook
-    logger.log('INFO', `Received message: ${userQuery}`);
+    let userQuery = "";
+    let imagePart = null;
 
     try {
+        // Handle normal text messages
+        if (ctx.message.text) {
+            userQuery = ctx.message.text;
+        } 
+        // Handle image messages
+        else if (ctx.message.photo) {
+            // If you send a photo without a caption, use a default fallback for the LTM embedding
+            userQuery = ctx.message.caption || "Please look at this image and respond to it.";
+            
+            // Telegram sends multiple resolutions. .pop() gets the highest quality one.
+            const highestResPhoto = ctx.message.photo.pop();
+            const fileLink = await ctx.telegram.getFileLink(highestResPhoto.file_id);
+            
+            // Download the image directly from Telegram
+            const response = await fetch(fileLink.href);
+            const arrayBuffer = await response.arrayBuffer();
+            const base64Image = Buffer.from(arrayBuffer).toString('base64');
+            
+            // Format it for the Google GenAI SDK
+            imagePart = {
+                inlineData: {
+                    data: base64Image,
+                    mimeType: 'image/jpeg'
+                }
+            };
+        }
+
+        // Pipeline Step 1: Logging Hook
+        logger.log('INFO', `Received message/image with text: ${userQuery}`);
+
         // Pipeline Step 2: Date Check
         const dateContext = getDateContext();
 
@@ -75,8 +103,6 @@ bot.on('text', async (ctx) => {
         // Pipeline Step 5: Context Assembly
         const personality = personalityManager.getPersonality();
         const systemContext = dateContext ? `\n\nSystem Context: ${dateContext}` : "";
-
-        // ADDED AGENT INSTRUCTIONS
         const agentContext = `\n\n[AGENT CAPABILITIES ENABLED]
 You now have access to the Raspberry Pi terminal and filesystem via Tools.
 - You can write code, run Python/Bash scripts, ping servers, and manage files.
@@ -84,10 +110,10 @@ You now have access to the Raspberry Pi terminal and filesystem via Tools.
 - SYSTEM SAFETY RULE: You are STRICTLY FORBIDDEN from reading, modifying, or deleting your own source code. The backend will block these attempts.
 - Be proactive! If the user asks you to write a script, use 'write_file' and 'execute_terminal' to actually create and run it on the system!`;
 
-        const finalPrompt = `
+        const finalPromptText = `
 System Instructions:
 Your communication style is informal, witty, and highly efficient, matching the tone of a private chat conversation. When answering, structure your response as if you are typing quickly on a mobile device. Use natural slang where appropriate, keep paragraphs under 4 lines, and always maintain the persona. Do not write like an encyclopedia entry.
-${personality}${systemContext}
+${personality}${systemContext}${agentContext}
 
 ${ltmContext}
 
@@ -96,8 +122,12 @@ ${stmContext}
 User Query: ${userQuery}
         `.trim();
 
+        // Create the prompt payload. If there is an image, append it to the text prompt!
+        const promptPayload = [{ text: finalPromptText }];
+        if (imagePart) promptPayload.push(imagePart);
+
         // Pipeline Step 6: LLM Call
-        const responseText = await llm.generateResponse(finalPrompt);
+        const responseText = await llm.generateResponse(promptPayload);
 
         // Pipeline Step 7: Response & Update
         await ctx.reply(responseText);
@@ -106,14 +136,11 @@ User Query: ${userQuery}
         // Update Backend
         await memoryManager.saveMessage('user', userQuery);
         await memoryManager.saveMessage('bot', responseText);
-        await memoryManager.incrementMessageCount(); // Global count increments by 1 interaction pair
+        await memoryManager.incrementMessageCount();
 
-} catch (error) {
-        // Extract ALL properties from the error, including hidden API data and stack traces
+    } catch (error) {
         const errorDetails = JSON.stringify(error, Object.getOwnPropertyNames(error));
-        
         logger.log('ERROR', `Pipeline failed. Message: ${error.message} | Full Dump: ${errorDetails}`);
-        
         ctx.reply("Sorry, my brain just glitched for a second. Could you repeat that?");
     }
 });
