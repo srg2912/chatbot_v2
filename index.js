@@ -76,6 +76,14 @@ bot.on('text', async (ctx) => {
         const personality = personalityManager.getPersonality();
         const systemContext = dateContext ? `\n\nSystem Context: ${dateContext}` : "";
 
+        // ADDED AGENT INSTRUCTIONS
+        const agentContext = `\n\n[AGENT CAPABILITIES ENABLED]
+You now have access to the Raspberry Pi terminal and filesystem via Tools.
+- You can write code, run Python/Bash scripts, ping servers, and manage files.
+- Your designated workspace is: ../agent_workspace
+- SYSTEM SAFETY RULE: You are STRICTLY FORBIDDEN from reading, modifying, or deleting your own source code. The backend will block these attempts.
+- Be proactive! If the user asks you to write a script, use 'write_file' and 'execute_terminal' to actually create and run it on the system!`;
+
         const finalPrompt = `
 System Instructions:
 Your communication style is informal, witty, and highly efficient, matching the tone of a private chat conversation. When answering, structure your response as if you are typing quickly on a mobile device. Use natural slang where appropriate, keep paragraphs under 4 lines, and always maintain the persona. Do not write like an encyclopedia entry.
