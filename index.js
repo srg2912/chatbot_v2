@@ -91,7 +91,7 @@ bot.on(['text', 'photo'], async (ctx) => {
         // Pipeline Step 2: Date Check
         const dateContext = getDateContext();
 
-        // Pipeline Step 3: Memory Retrieval (LTM + STM)
+        // Pipeline Step 3: Short & Long-Term Memory Retrieval
         const queryEmbedding = await llm.getEmbedding(userQuery);
         const ltmChunks = await memoryManager.getLTM(queryEmbedding);
         const ltmContext = ltmChunks.length > 0 ? "Relevant Knowledge (LTM):\n" + ltmChunks.join('\n') : "";
@@ -99,23 +99,38 @@ bot.on(['text', 'photo'], async (ctx) => {
         const stmMessages = await memoryManager.getSTM();
         const stmContext = "Recent Conversation (STM):\n" + stmMessages.map(m => `${m.role}: ${m.content}`).join('\n');
 
-        // Pipeline Step 4: Personality Check
+        // NEW Pipeline Step 3.5: Mid-Term Memory (Diary) Retrieval
+        const diaryEntries = await memoryManager.getLast5DiaryEntries();
+        const mtmContext = diaryEntries.length > 0 
+            ? "Mid-Term Memory (Recent Diary Entries):\n" + diaryEntries.map((e, i) => `Entry ${i + 1}: ${e}`).join('\n') 
+            : "";
+
+        // Pipeline Step 4: System States (Diary & Personality Checks)
         const currentCount = await memoryManager.getMessageCount();
+        
+        // Check for Mid-Term Memory update (Every 20 interactions)
+        if (currentCount > 0 && currentCount % 20 === 0) {
+            logger.log('INFO', 'Triggering Diary Entry Generation.');
+            const last40 = await memoryManager.getMessagesForDiary();
+            
+            // Only generate if we actually have messages to summarize
+            if (last40.length > 0) { 
+                const diaryEntry = await llm.generateDiaryEntry(last40);
+                await memoryManager.saveDiaryEntry(diaryEntry);
+                logger.log('INFO', `Diary entry saved.`);
+            }
+        }
+
+        // Check for Personality Evolution (Every 50 interactions)
         if (currentCount > 0 && currentCount % 50 === 0) {
             logger.log('INFO', 'Triggering Personality Evolution.');
-            
             const last50 = await memoryManager.getLast50Messages();
             const currentPersonality = personalityManager.getPersonality();
-            
-            // Pass the current personality along with the messages
             const newPersonality = await llm.evolvePersonality(currentPersonality, last50);
             
-            // Sanity check: Ensure the LLM didn't return an empty string or a tiny error message before overwriting
             if (newPersonality && newPersonality.length > 50) {
-                logger.log('INFO', `Personality organically evolved. New length: ${newPersonality.length} chars.`);
+                logger.log('INFO', `Personality organically evolved.`);
                 personalityManager.updatePersonality(newPersonality);
-            } else {
-                logger.log('WARN', 'Personality evolution aborted: LLM returned invalid/empty text.');
             }
         }
 
@@ -137,6 +152,8 @@ CRITICAL COMMUNICATION RULE:
 Do NOT repeat the same sentence structures, formatting, or conversational patterns over and over. Vary your responses, keep them natural, and be highly dynamic.When answering, structure your response as if you are typing quickly on a mobile device. Use natural slang where appropriate but don't overdoit, keep paragraphs under 4 lines, and always maintain the persona.
 
 ${ltmContext}
+
+${mtmContext}
 
 ${stmContext}
 

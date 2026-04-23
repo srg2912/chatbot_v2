@@ -39,6 +39,15 @@ export const initDB = async () => {
         );
     `);
 
+    // Mid-Term Memory (Diary) Table
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS diary_entries (
+            id SERIAL PRIMARY KEY,
+            content TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+    `);
+
     // Initialize global counter
     await pool.query(`
         INSERT INTO bot_state (key, value) VALUES ('message_count', 0)

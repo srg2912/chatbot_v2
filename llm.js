@@ -112,5 +112,25 @@ ${messages.map(m => `${m.role}: ${m.content}`).join('\n')}
             // Remove any potential markdown code blocks the LLM might try to wrap it in
             return response.text.replace(/^```[\s\S]*?\n|```$/g, '').trim();
         });
+    },
+    generateDiaryEntry: async (messages) => {
+        return await withRetry(async () => {
+            const prompt = `
+You are an AI companion maintaining an internal personal diary to remember recent events.
+Please write a concise diary entry summarizing the following recent conversation history.
+- Keep it brief (under 3-4 sentences).
+- Write from your own first-person perspective.
+- Capture the main topics discussed, your thoughts, the user's mood, and any actionable takeaways.
+
+Recent Conversation:
+${messages.map(m => `${m.role}: ${m.content}`).join('\n')}
+            `.trim();
+            
+            const response = await ai.models.generateContent({
+                model: modelName,
+                contents: prompt,
+            });
+            return response.text.trim();
+        });
     }
 };

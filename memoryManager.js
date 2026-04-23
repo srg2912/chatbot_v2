@@ -45,5 +45,28 @@ export const memoryManager = {
             ORDER BY id DESC LIMIT 50;
         `);
         return res.rows.reverse();
+    },
+    // --- MID-TERM MEMORY (DIARY) METHODS ---
+    saveDiaryEntry: async (content) => {
+        await pool.query(
+            'INSERT INTO diary_entries (content) VALUES ($1)',
+            [content]
+        );
+    },
+    getLast5DiaryEntries: async () => {
+        const res = await pool.query(`
+            SELECT content FROM diary_entries
+            ORDER BY id DESC LIMIT 5;
+        `);
+        // Extract the strings and reverse to chronological order
+        return res.rows.map(r => r.content).reverse();
+    },
+    getMessagesForDiary: async () => {
+        // 20 interactions = 40 messages
+        const res = await pool.query(`
+            SELECT role, content FROM messages
+            ORDER BY id DESC LIMIT 40;
+        `);
+        return res.rows.reverse();
     }
 };
