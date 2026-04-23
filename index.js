@@ -39,6 +39,15 @@ function getDateContext() {
     return contextLines.length > 0 ? contextLines.join(' ') : null;
 }
 
+// Emergency Loop-Breaker Command
+bot.command('reset', async (ctx) => {
+    if (ctx.from.id !== ALLOWED_USER_ID) return;
+    
+    await memoryManager.clearSTM();
+    logger.log('INFO', 'User triggered STM reset to break conversational loop.');
+    ctx.reply("🧠 *Shakes head* Whoa... I just completely cleared my short-term memory cache. What were we just talking about? (Loop broken!)", { parse_mode: 'Markdown' });
+});
+
 // Listen to both text and photos
 bot.on(['text', 'photo'], async (ctx) => {
     if (ctx.from.id !== ALLOWED_USER_ID) {
@@ -122,8 +131,10 @@ You now have access to the Raspberry Pi terminal and filesystem via Tools.
 
         const finalPromptText = `
 System Instructions:
-Your communication style is informal, witty, and highly efficient, matching the tone of a private chat conversation. When answering, structure your response as if you are typing quickly on a mobile device. Use natural slang where appropriate, keep paragraphs under 4 lines, and always maintain the persona. Do not write like an encyclopedia entry.
 ${personality}${systemContext}${agentContext}
+
+CRITICAL COMMUNICATION RULE:
+Do NOT repeat the same sentence structures, formatting, or conversational patterns over and over. Vary your responses, keep them natural, and be highly dynamic.When answering, structure your response as if you are typing quickly on a mobile device. Use natural slang where appropriate but don't overdoit, keep paragraphs under 4 lines, and always maintain the persona.
 
 ${ltmContext}
 

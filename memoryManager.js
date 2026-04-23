@@ -21,9 +21,13 @@ export const memoryManager = {
     getSTM: async () => {
         const res = await pool.query(`
             SELECT role, content FROM messages
-            ORDER BY id DESC LIMIT 40;
+            ORDER BY id DESC LIMIT 20;
         `);
         return res.rows.reverse();
+    },
+    clearSTM: async () => {
+        // Deletes the recent conversational history to break loops
+        await pool.query('DELETE FROM messages;');
     },
     // LTM vector similarity search
     getLTM: async (embedding) => {

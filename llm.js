@@ -35,7 +35,9 @@ generateResponse: async (promptData) => {
                     model: modelName,
                     contents: messages,
                     config: {
-                        tools: tools // <--- Now it is correctly passed to Google!
+                        tools: tools,
+                        temperature: 0.9,
+                        topP: 0.95
                     }
                 });
 
