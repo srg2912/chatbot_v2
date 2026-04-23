@@ -8,19 +8,15 @@ export const personalityManager = {
         try {
             return fs.readFileSync(FILE_PATH, 'utf-8');
         } catch (e) {
-            return "You are a helpful companion."; // Safe fallback
+            return "You are Nano, a helpful companion."; // Safe fallback
         }
     },
-    updatePersonality: (tweak) => {
-        const current = personalityManager.getPersonality();
-        let updated = current + `\n\n[Suggested Tweak]: ${tweak}`;
+    updatePersonality: (newPersonalityText) => {
+        let updated = newPersonalityText.trim();
 
+        // Safety fallback: If the LLM generates a novel, strictly cut it off.
         if (updated.length > MAX_CHARS) {
-            // Keep the foundational 1000 characters intact, drop older tweaks, keep the newest
-            const keepStart = 1000;
-            const beginning = updated.slice(0, keepStart);
-            const end = updated.slice(-(MAX_CHARS - keepStart - 5)); // -5 for \n...\n
-            updated = beginning + "\n...\n" + end;
+            updated = updated.slice(0, MAX_CHARS);
         }
 
         fs.writeFileSync(FILE_PATH, updated);

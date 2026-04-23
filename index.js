@@ -93,11 +93,21 @@ bot.on(['text', 'photo'], async (ctx) => {
         // Pipeline Step 4: Personality Check
         const currentCount = await memoryManager.getMessageCount();
         if (currentCount > 0 && currentCount % 50 === 0) {
-            logger.log('INFO', 'Triggering Personality Reflection.');
+            logger.log('INFO', 'Triggering Personality Evolution.');
+            
             const last50 = await memoryManager.getLast50Messages();
-            const tweak = await llm.reflectOnMessages(last50);
-            logger.log('INFO', `Suggested tweak: ${tweak}`);
-            personalityManager.updatePersonality(tweak);
+            const currentPersonality = personalityManager.getPersonality();
+            
+            // Pass the current personality along with the messages
+            const newPersonality = await llm.evolvePersonality(currentPersonality, last50);
+            
+            // Sanity check: Ensure the LLM didn't return an empty string or a tiny error message before overwriting
+            if (newPersonality && newPersonality.length > 50) {
+                logger.log('INFO', `Personality organically evolved. New length: ${newPersonality.length} chars.`);
+                personalityManager.updatePersonality(newPersonality);
+            } else {
+                logger.log('WARN', 'Personality evolution aborted: LLM returned invalid/empty text.');
+            }
         }
 
         // Pipeline Step 5: Context Assembly

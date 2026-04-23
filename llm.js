@@ -81,11 +81,34 @@ generateResponse: async (promptData) => {
             return response.embeddings[0].values;
         });
     },
-    reflectOnMessages: async (messages) => {
+    evolvePersonality: async (currentPersonality, messages) => {
         return await withRetry(async () => {
-            const prompt = `You are a Meta-Cognitive Analyst... \n\nConversation:\n${messages.map(m => `${m.role}: ${m.content}`).join('\n')}`;
-            const response = await ai.models.generateContent({ model: modelName, contents: prompt });
-            return response.text.trim();
+            const prompt = `
+You are an internal system responsible for gently evolving the core personality prompt of a conversational AI companion. 
+Below is her CURRENT personality prompt, followed by her last 50 interactions with the user.
+
+Your task: Rewrite the personality prompt. 
+- Keep it in the "You are..." style.
+- Maintain her core identity, tone, and fundamental directives.
+- Make SLIGHT, subtle modifications based on the recent conversation dynamics (e.g., if the user has been discussing coding a lot, subtly weave in that she is a coding partner; if the user is stressed, make her core prompt slightly more patient/empathetic).
+- Do NOT drastically change who she is. Evolution should be gradual and feel organic.
+- Keep it highly coherent and under 1500 characters.
+- Output ONLY the newly rewritten personality text. Do not include any commentary, intros, quotes, or formatting wrappers.
+
+CURRENT PERSONALITY PROMPT:
+${currentPersonality}
+
+RECENT CONVERSATION:
+${messages.map(m => `${m.role}: ${m.content}`).join('\n')}
+            `.trim();
+            
+            const response = await ai.models.generateContent({
+                model: modelName,
+                contents: prompt,
+            });
+            
+            // Remove any potential markdown code blocks the LLM might try to wrap it in
+            return response.text.replace(/^```[\s\S]*?\n|```$/g, '').trim();
         });
     }
 };
