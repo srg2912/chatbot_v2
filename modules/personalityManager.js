@@ -1,6 +1,8 @@
 import fs from 'fs';
+import path from 'path';
 
-const FILE_PATH = '../personality.txt';
+
+const FILE_PATH = path.resolve(process.cwd(), 'personality.txt');
 const MAX_CHARS = 2000;
 
 export const personalityManager = {

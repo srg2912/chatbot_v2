@@ -1,6 +1,7 @@
 import fs from 'fs';
+import path from 'path';
 
-const LOG_FILE = '../logs.txt';
+const LOG_FILE = path.resolve(process.cwd(), 'logs.txt');
 const MAX_LINES = 50;
 
 export const logger = {
