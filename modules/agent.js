@@ -10,7 +10,7 @@ const PROJECT_DIR = process.cwd();
 const PROJECT_DIR_NAME = path.basename(PROJECT_DIR); 
 
 // Create a safe sandbox directory one level above the project folder
-const WORKSPACE_DIR = path.resolve(PROJECT_DIR, '../agent_workspace');
+const WORKSPACE_DIR = path.resolve(PROJECT_DIR, '../../agent_workspace');
 if (!fs.existsSync(WORKSPACE_DIR)) {
     fs.mkdirSync(WORKSPACE_DIR, { recursive: true });
 }
@@ -31,7 +31,7 @@ export const tools = [{
     functionDeclarations:[
         {
             name: 'execute_terminal',
-            description: 'Executes a bash command on the Raspberry Pi terminal.',
+            description: 'Executes a bash command on the terminal.',
             parameters: {
                 type: 'OBJECT',
                 properties: {

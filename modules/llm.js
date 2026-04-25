@@ -57,11 +57,11 @@ generateResponse: async (promptData) => {
                         
                         modelParts.push({ functionCall: call });
                         
-                        // Truncate terminal output to 4000 chars so massive logs don't crash the prompt
+                        // Truncate terminal output to 64000 chars so massive logs don't crash the prompt
                         toolResponses.push({
                             functionResponse: {
                                 name: call.name,
-                                response: { result: String(result).slice(0, 4000) }
+                                response: { result: String(result).slice(0, 64000) }
                             }
                         });
                     }

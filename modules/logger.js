@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-const LOG_FILE = 'logs.txt';
+const LOG_FILE = '../logs.txt';
 const MAX_LINES = 50;
 
 export const logger = {

@@ -2,11 +2,11 @@ import express from 'express';
 import { Telegraf } from 'telegraf';
 import dotenv from 'dotenv';
 
-import { logger } from './logger.js';
-import { initDB } from './db.js';
-import { personalityManager } from './personalityManager.js';
-import { memoryManager } from './memoryManager.js';
-import { llm } from './llm.js';
+import { logger } from './modules/logger.js';
+import { initDB } from './modules/db.js';
+import { personalityManager } from './modules/personalityManager.js';
+import { memoryManager } from './modules/memoryManager.js';
+import { llm } from './modules/llm.js';
 
 dotenv.config();
 

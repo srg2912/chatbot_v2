@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-const FILE_PATH = 'personality.txt';
+const FILE_PATH = '../personality.txt';
 const MAX_CHARS = 2000;
 
 export const personalityManager = {
@@ -8,7 +8,7 @@ export const personalityManager = {
         try {
             return fs.readFileSync(FILE_PATH, 'utf-8');
         } catch (e) {
-            return "You are Nano, a helpful companion."; // Safe fallback
+            return "You are a helpful companion."; // Safe fallback
         }
     },
     updatePersonality: (newPersonalityText) => {
