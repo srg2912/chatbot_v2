@@ -9,8 +9,6 @@ export const initDB = async () => {
     // Enable Vector Extension
     await pool.query('CREATE EXTENSION IF NOT EXISTS vector;');
 
-    await pool.query('DROP TABLE IF EXISTS document_chunks;');
-
     // LTM Table
     await pool.query(`
         CREATE TABLE IF NOT EXISTS document_chunks (

@@ -94,7 +94,7 @@ Your task: Rewrite the personality prompt.
 - Maintain her core identity, tone, and fundamental directives.
 - Make SLIGHT, subtle modifications based on the recent conversation dynamics (e.g., if the user has been discussing coding a lot, subtly weave in that she is a coding partner; if the user is stressed, make her core prompt slightly more patient/empathetic).
 - Do NOT drastically change who she is. Evolution should be gradual and feel organic.
-- Keep it highly coherent and under 1500 characters.
+- Keep it highly coherent and under 3500 characters.
 - Output ONLY the newly rewritten personality text. Do not include any commentary, intros, quotes, or formatting wrappers.
 
 CURRENT PERSONALITY PROMPT:

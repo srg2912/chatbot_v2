@@ -189,7 +189,11 @@ app.listen(port, async () => {
         logger.log('INFO', 'Initializing Database...');
         await initDB();
         logger.log('INFO', `Express running on port ${port}`);
-        
+
+        // ADD THESE TWO LINES:
+        await bot.telegram.deleteWebhook({ drop_pending_updates: true });
+        logger.log('INFO', 'Webhook cleared, starting polling...');
+
         bot.launch();
         logger.log('INFO', 'Telegram Agent live and polling.');
     } catch (error) {
@@ -197,6 +201,7 @@ app.listen(port, async () => {
         console.error("Fatal Startup Error:", error);
     }
 });
+
 // Graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
